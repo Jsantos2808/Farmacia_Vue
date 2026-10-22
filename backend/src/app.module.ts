@@ -4,9 +4,10 @@ import { DispenseControlledMedication } from './application/dispense-controlled-
 import { DISPENSATION_REPOSITORY } from './application/ports/dispensation.repository'
 import { MongoDispensationRepository } from './infrastructure/mongo/mongo-dispensation.repository'
 import { DispensationsController } from './presentation/dispensations.controller'
+import { HealthController } from './presentation/health.controller'
 
 @Module({
-  controllers: [DispensationsController],
+  controllers: [DispensationsController, HealthController],
   providers: [
     {
       provide: MongoClient,

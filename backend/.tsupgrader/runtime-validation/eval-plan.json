@@ -1,0 +1,49 @@
+{
+  "generatedAt": "2026-10-22T03:30:00Z",
+  "generatedOnPlatform": "win32",
+  "projectType": "server",
+  "setup": [
+    {
+      "command": "npm",
+      "args": ["ci"]
+    }
+  ],
+  "assertions": [
+    {
+      "name": "backend-build",
+      "kind": "process",
+      "command": "npm",
+      "args": ["run", "build"],
+      "verificationMethod": "exit-code",
+      "expected": "0",
+      "timeoutSeconds": 180
+    },
+    {
+      "name": "tests-pass",
+      "kind": "process",
+      "command": "npm",
+      "args": ["test"],
+      "env": {
+        "TEST_MONGODB_URI": "mongodb://localhost:27017/?directConnection=true&replicaSet=rs0"
+      },
+      "verificationMethod": "test-results",
+      "expected": "0",
+      "timeoutSeconds": 300
+    },
+    {
+      "name": "api-health-200",
+      "kind": "http-probe",
+      "startCommand": "npm",
+      "startArgs": ["run", "start:dev"],
+      "env": {
+        "PORT": "3001",
+        "MONGODB_URI": "mongodb://localhost:27017/?directConnection=true&replicaSet=rs0",
+        "MONGODB_DATABASE": "pharmacy"
+      },
+      "url": "http://localhost:3001/api/health",
+      "verificationMethod": "http-status",
+      "expected": "200",
+      "timeoutSeconds": 60
+    }
+  ]
+}

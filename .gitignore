@@ -6,3 +6,4 @@ coverage/
 terraform.tfstate*
 *.log
 .DS_Store
+.tsupgrader/runtime-validation/standalone-result.json

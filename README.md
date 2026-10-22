@@ -21,6 +21,21 @@ npm --prefix backend run start:dev
 
 Configura `MONGODB_URI` para apuntar a un MongoDB replica set antes de iniciar el API.
 
+## Pruebas automatizadas
+
+Las 33 pruebas cubren el modelo MVI del formulario (8), validaciones del caso de uso e integración de dispensación transaccional contra un MongoDB replica set real (25). Para ejecutarlas localmente desde PowerShell con el stack Compose iniciado:
+
+```powershell
+docker compose up -d mongo
+$env:TEST_MONGODB_URI = "mongodb://localhost:27017/?directConnection=true&replicaSet=rs0"
+npm --prefix backend test
+npm --prefix frontend test
+```
+
+Si aún no instalaste las dependencias en el host, ejecuta una vez `npm --prefix backend ci` y `npm --prefix frontend ci`. El conjunto de Mongo usa una base temporal independiente con prefijo `pharmacy_test_` y la elimina al terminar; no modifica la base local de desarrollo `pharmacy`.
+
+La ruta `GET /api/health` responde cuando la API está lista: `http://localhost:3000/api/health`.
+
 ## Terraform Atlas
 
 El módulo crea un proyecto y un cluster Atlas M0 de desarrollo; no crea usuarios de base de datos ni reglas de acceso IP. Configura las credenciales del proveedor Atlas mediante `MONGODB_ATLAS_PUBLIC_KEY` y `MONGODB_ATLAS_PRIVATE_KEY`, luego ejecuta desde `terraform/`:
