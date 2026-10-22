@@ -1,0 +1,58 @@
+{
+  "_notes": [
+    "Dates are stored as BSON Date; the ISO values below are illustrative.",
+    "Transaction documents are append-only at the application level.",
+    "Use pseudonymous prescriber IDs and protect any patient identifiers separately."
+  ],
+  "Products": {
+    "sku": "MED-0001",
+    "name": "Medicamento de ejemplo",
+    "controlCategory": "PSYCHOTROPIC",
+    "minimumStock": 12,
+    "createdAt": "2026-01-01T00:00:00.000Z",
+    "updatedAt": "2026-01-01T00:00:00.000Z"
+  },
+  "Batches": {
+    "sku": "MED-0001",
+    "batchId": "LOT-2026-A",
+    "expiresAt": "2027-01-01T00:00:00.000Z",
+    "quantityAvailable": 20,
+    "receivedAt": "2026-01-01T00:00:00.000Z"
+  },
+  "Transactions": {
+    "type": "DISPENSATION",
+    "sku": "MED-0001",
+    "quantity": 2,
+    "batches": [
+      {
+        "batchId": "LOT-2026-A",
+        "quantity": 2,
+        "expiresAt": "2027-01-01T00:00:00.000Z"
+      }
+    ],
+    "userId": "identity-provider-subject",
+    "timestamp": "2026-06-01T10:00:00.000Z",
+    "prescription": {
+      "folio": "RX-123456",
+      "prescriberId": "LICENSE-987"
+    }
+  },
+  "Prescriptions": {
+    "folio": "RX-123456",
+    "prescriberId": "LICENSE-987",
+    "productSku": "MED-0001",
+    "status": "VALID",
+    "validUntil": "2026-12-31T23:59:59.000Z",
+    "quantityRemaining": 10,
+    "createdAt": "2026-05-01T00:00:00.000Z",
+    "updatedAt": "2026-05-01T00:00:00.000Z"
+  },
+  "OutboxEvents": {
+    "type": "LOW_STOCK",
+    "sku": "MED-0001",
+    "available": 8,
+    "threshold": 12,
+    "status": "PENDING",
+    "createdAt": "2026-06-01T10:00:00.000Z"
+  }
+}

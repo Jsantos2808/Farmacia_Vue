@@ -1,0 +1,54 @@
+services:
+  mongo:
+    image: mongo:7
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    ports:
+      - "127.0.0.1:27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test:
+        - CMD
+        - mongosh
+        - --quiet
+        - --eval
+        - "try { rs.status().ok } catch(e) { rs.initiate({_id:'rs0',members:[{_id:0,host:'mongo:27017'}]}).ok }"
+      interval: 5s
+      timeout: 10s
+      retries: 20
+      start_period: 10s
+
+  api:
+    image: node:22-alpine
+    working_dir: /workspace/backend
+    command: sh -c "npm ci && npm run start:dev"
+    environment:
+      MONGODB_URI: ${MONGODB_URI:-mongodb://mongo:27017/pharmacy?replicaSet=rs0}
+      MONGODB_DATABASE: ${MONGODB_DATABASE:-pharmacy}
+    volumes:
+      - ./backend:/workspace/backend
+      - backend_node_modules:/workspace/backend/node_modules
+    ports:
+      - "3000:3000"
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  web:
+    image: node:22-alpine
+    working_dir: /workspace/frontend
+    command: sh -c "npm ci && npm run dev"
+    environment:
+      VITE_API_PROXY: http://api:3000
+    volumes:
+      - ./frontend:/workspace/frontend
+      - frontend_node_modules:/workspace/frontend/node_modules
+    ports:
+      - "5173:5173"
+    depends_on:
+      - api
+
+volumes:
+  mongo_data:
+  backend_node_modules:
+  frontend_node_modules:
