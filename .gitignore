@@ -7,3 +7,4 @@ terraform.tfstate*
 *.log
 .DS_Store
 .tsupgrader/runtime-validation/standalone-result.json
+**/.tsupgrader/runtime-validation/standalone-result.json
