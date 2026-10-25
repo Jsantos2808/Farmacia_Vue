@@ -1,4 +1,5 @@
 import { readonly, shallowRef } from 'vue'
+import { getToken } from '../../lib/session'
 
 export type SaleIntent =
   | { type: 'skuChanged'; value: string }
@@ -64,10 +65,13 @@ export function useControlledSaleModel() {
 
         update({ status: 'submitting', message: '' })
         try {
+          const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+          const token = getToken()
+          if (token) headers.Authorization = `Bearer ${token}`
           const response = await fetch('/api/dispensations', {
             method: 'POST',
             credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
+            headers,
             body: JSON.stringify({
               sku: state.sku.trim(),
               quantity,
@@ -76,8 +80,19 @@ export function useControlledSaleModel() {
             }),
           })
           if (!response.ok) {
-            const details = await response.text()
-            throw new Error(details || `La solicitud falló (${response.status}).`)
+            let details = `La solicitud falló (${response.status}).`
+            const text = await response.text()
+            if (text) {
+              try {
+                const payload = JSON.parse(text) as { message?: string | string[] }
+                if (Array.isArray(payload.message)) details = payload.message.join(', ')
+                else if (payload.message) details = payload.message
+                else details = text
+              } catch {
+                details = text
+              }
+            }
+            throw new Error(details)
           }
           update({ status: 'success', message: 'Dispensación registrada correctamente.' })
         } catch (error) {

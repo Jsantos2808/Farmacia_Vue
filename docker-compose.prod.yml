@@ -1,0 +1,35 @@
+# Production-like stack. Point MONGODB_URI at MongoDB Atlas.
+# Usage:
+#   export MONGODB_URI='mongodb+srv://...'
+#   export JWT_SECRET='...'
+#   docker compose -f docker-compose.prod.yml up --build -d
+
+services:
+  api:
+    build:
+      context: ./backend
+    environment:
+      MONGODB_URI: ${MONGODB_URI:?Set MONGODB_URI to your Atlas connection string}
+      MONGODB_DATABASE: ${MONGODB_DATABASE:-pharmacy}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET}
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+      PORT: 3000
+      NODE_ENV: production
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: ./frontend
+    ports:
+      - "8080:8080"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
