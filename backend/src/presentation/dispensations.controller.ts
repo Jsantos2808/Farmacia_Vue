@@ -3,6 +3,7 @@ import {
   Body,
   ConflictException,
   Controller,
+  Inject,
   NotFoundException,
   Post,
   Req,
@@ -11,12 +12,9 @@ import {
 import { IsInt, IsNotEmpty, IsString, Min } from 'class-validator'
 import { DispenseControlledMedication } from '../application/dispense-controlled-medication'
 import { DispensationError } from '../domain/dispensation'
+import { AuthenticatedRequest } from './auth.middleware'
 import { AuthenticatedUserGuard } from './authenticated-user.guard'
-import { Request } from 'express'
-
-interface AuthenticatedRequest extends Request {
-  user: { sub: string }
-}
+import { RolesGuard } from './roles.guard'
 
 class DispenseRequest {
   @IsString()
@@ -37,16 +35,19 @@ class DispenseRequest {
 }
 
 @Controller('dispensations')
-@UseGuards(AuthenticatedUserGuard)
+@UseGuards(AuthenticatedUserGuard, RolesGuard)
 export class DispensationsController {
-  constructor(private readonly dispenseMedication: DispenseControlledMedication) {}
+  constructor(
+    @Inject(DispenseControlledMedication)
+    private readonly dispenseMedication: DispenseControlledMedication,
+  ) {}
 
   @Post()
   async dispense(@Body() body: DispenseRequest, @Req() request: AuthenticatedRequest) {
     try {
       return await this.dispenseMedication.execute({
         ...body,
-        userId: request.user.sub,
+        userId: request.user!.sub,
       })
     } catch (error) {
       if (error instanceof DispensationError) {

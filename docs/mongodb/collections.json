@@ -2,12 +2,25 @@
   "_notes": [
     "Dates are stored as BSON Date; the ISO values below are illustrative.",
     "Transaction documents are append-only at the application level.",
-    "Use pseudonymous prescriber IDs and protect any patient identifiers separately."
+    "Sales store customerName as the buyer receipt identifier for the pharmacy counter.",
+    "Inventory allocation for sales and controlled dispensations uses FEFO (expiresAt ascending)."
   ],
+  "Users": {
+    "_id": "uuid",
+    "email": "cajero@farmacia.local",
+    "fullName": "Ana Cajero",
+    "role": "cashier",
+    "passwordHash": "bcrypt-hash",
+    "createdAt": "2026-01-01T00:00:00.000Z"
+  },
   "Products": {
     "sku": "MED-0001",
-    "name": "Medicamento de ejemplo",
-    "controlCategory": "PSYCHOTROPIC",
+    "name": "Paracetamol 500mg",
+    "description": "Analgésico / antipirético",
+    "sellMode": "BOX",
+    "unitsPerBox": 10,
+    "unitPrice": 1.5,
+    "controlCategory": "OTC",
     "minimumStock": 12,
     "createdAt": "2026-01-01T00:00:00.000Z",
     "updatedAt": "2026-01-01T00:00:00.000Z"
@@ -17,30 +30,40 @@
     "batchId": "LOT-2026-A",
     "expiresAt": "2027-01-01T00:00:00.000Z",
     "quantityAvailable": 20,
-    "receivedAt": "2026-01-01T00:00:00.000Z"
+    "receivedAt": "2026-01-01T00:00:00.000Z",
+    "unitCost": 0.8
   },
   "Transactions": {
-    "type": "DISPENSATION",
-    "sku": "MED-0001",
-    "quantity": 2,
-    "batches": [
+    "type": "SALE",
+    "id": "uuid",
+    "customerName": "Juan Méndez",
+    "cashierId": "uuid",
+    "cashierName": "Ana Cajero",
+    "lines": [
       {
-        "batchId": "LOT-2026-A",
+        "sku": "MED-0001",
+        "productName": "Paracetamol 500mg",
+        "sellMode": "UNIT",
         "quantity": 2,
-        "expiresAt": "2027-01-01T00:00:00.000Z"
+        "unitsSold": 2,
+        "unitPrice": 1.5,
+        "lineTotal": 3,
+        "batches": [
+          {
+            "batchId": "LOT-2026-A",
+            "quantity": 2,
+            "expiresAt": "2027-01-01T00:00:00.000Z"
+          }
+        ]
       }
     ],
-    "userId": "identity-provider-subject",
-    "timestamp": "2026-06-01T10:00:00.000Z",
-    "prescription": {
-      "folio": "RX-123456",
-      "prescriberId": "LICENSE-987"
-    }
+    "totalAmount": 3,
+    "timestamp": "2026-06-01T10:00:00.000Z"
   },
   "Prescriptions": {
     "folio": "RX-123456",
     "prescriberId": "LICENSE-987",
-    "productSku": "MED-0001",
+    "productSku": "ABX-0001",
     "status": "VALID",
     "validUntil": "2026-12-31T23:59:59.000Z",
     "quantityRemaining": 10,

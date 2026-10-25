@@ -25,6 +25,9 @@ services:
     environment:
       MONGODB_URI: ${MONGODB_URI:-mongodb://mongo:27017/pharmacy?replicaSet=rs0}
       MONGODB_DATABASE: ${MONGODB_DATABASE:-pharmacy}
+      JWT_SECRET: ${JWT_SECRET:-dev-only-change-me}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
+      PORT: 3000
     volumes:
       - ./backend:/workspace/backend
       - backend_node_modules:/workspace/backend/node_modules
