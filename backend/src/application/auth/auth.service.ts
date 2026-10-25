@@ -3,7 +3,13 @@ import { sign, verify } from 'jsonwebtoken'
 import { AuthError, AuthTokenPayload, UserAccount } from '../../domain/user'
 import { AUTH_REPOSITORY, AuthRepository, RegisterUserCommand } from '../ports/auth.repository'
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+function isValidEmail(value: string): boolean {
+  const at = value.indexOf('@')
+  if (at <= 0 || at !== value.lastIndexOf('@')) return false
+  const domain = value.slice(at + 1)
+  const dot = domain.indexOf('.')
+  return dot > 0 && dot < domain.length - 1 && !/\s/.test(value)
+}
 
 @Injectable()
 export class AuthService {
@@ -12,7 +18,7 @@ export class AuthService {
   async register(command: RegisterUserCommand): Promise<{ user: UserAccount; token: string }> {
     const email = command.email.trim().toLowerCase()
     const fullName = command.fullName.trim()
-    if (!EMAIL_PATTERN.test(email)) throw new AuthError('Email inválido', 'INVALID_EMAIL')
+    if (!isValidEmail(email)) throw new AuthError('Email inválido', 'INVALID_EMAIL')
     if (fullName.length < 2) throw new AuthError('Nombre inválido', 'INVALID_EMAIL')
     if (command.password.length < 8) {
       throw new AuthError('La contraseña debe tener al menos 8 caracteres', 'WEAK_PASSWORD')
@@ -29,7 +35,7 @@ export class AuthService {
 
   async login(email: string, password: string): Promise<{ user: UserAccount; token: string }> {
     const normalized = email.trim().toLowerCase()
-    if (!EMAIL_PATTERN.test(normalized) || !password) {
+    if (!isValidEmail(normalized) || !password) {
       throw new AuthError('Credenciales inválidas', 'INVALID_CREDENTIALS')
     }
     const user = await this.repository.authenticate(normalized, password)

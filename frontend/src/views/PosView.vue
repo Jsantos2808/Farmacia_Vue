@@ -42,7 +42,7 @@ onMounted(async () => {
     stock.value = Object.fromEntries(stockList.map((row) => [row.sku, row.available]))
     if (otcProducts.value[0]) {
       selectedSku.value = otcProducts.value[0].sku
-      sellMode.value = otcProducts.value[0].sellMode === 'BOX' ? 'UNIT' : 'UNIT'
+      sellMode.value = 'UNIT'
     }
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'No se pudo cargar el catálogo'
